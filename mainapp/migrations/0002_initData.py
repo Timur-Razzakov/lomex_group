@@ -14,10 +14,13 @@ def movies_data(apps, schema_editor):
         for item in data:
             ac = []
             wr = []
+            # убираем лишние пробелы
             if item['writers'].strip():
+                # преобразуем в json
                 new_item = json.loads(item['writers'])
                 wr = [item['id'] for item in new_item]
             else:
+                # если верхний список пуст добавляем этот
                 wr.append(item['writer'])
             # берёт объекты писателей из бд
             writers_objects = [writer_2.objects.get(id=x) for x in wr]
@@ -30,16 +33,20 @@ def movies_data(apps, schema_editor):
                 description=item["plot"],
                 imdb_rating=item["imdb_rating"],
             )
+            # берём каждое значение и проверяем его на None
             for writer in writers_objects:
                 if writer.name == 'N/A':
                     movies.writers_names = None
                 else:
+                    # если имя последнее в списке, то запятую не ставим
                     if writer == writers_objects[-1]:
                         movies.writers_names += writer.name
                     else:
+                        # ставим запятые после одного полного имени
                         name = writer.name + ", "
                         movies.writers_names += name
             movies.save()
+            # Добавляем имена в модель
             for writer in writers_objects:
                 movies.writers.add(writer)
 
