@@ -8,16 +8,20 @@ from .data_unique_genres import unique_genres
 genres = unique_genres('genre', Movie)
 
 
-def index(request):
+def get_api_genres(request):
     ratings = Movie.objects.all().values('title', 'imdb_rating', 'genre')
     all_ratings = 0
     movies_count = 0
-    for item in ratings:
-        # for genre in genres:
-        if 'Biography' in item["genre"]:
-            movies_count +=1
-            all_ratings+=float(item["imdb_rating"])
-    avg_rating = all_ratings/movies_count
+    # перебираем каждый жанр из нашего списка
+    for genre in genres:
+        for item in ratings:
+            if genre in item["genre"]:
+                movies_count += 1
+                if item["imdb_rating"] in 'N/A':
+                    continue
+                all_ratings += float(item["imdb_rating"])
+        avg_rating = all_ratings / movies_count
+        print('-------------------',genre, movies_count, avg_rating, sep='\n')
     return render(request, 'mainapp/index.html', )
 
 #
