@@ -5,15 +5,19 @@ from .models import Actor, Writer, Movie
 from .data_unique_genres import unique_genres
 
 # получаем уникальные жанры
-genre = unique_genres('genre', Movie)
+genres = unique_genres('genre', Movie)
 
 
 def index(request):
     ratings = Movie.objects.all().values('title', 'imdb_rating', 'genre')
-
+    all_ratings = 0
+    movies_count = 0
     for item in ratings:
-        if item["genre"] == 'Biography':
-            print(item)
+        # for genre in genres:
+        if 'Biography' in item["genre"]:
+            movies_count +=1
+            all_ratings+=float(item["imdb_rating"])
+    avg_rating = all_ratings/movies_count
     return render(request, 'mainapp/index.html', )
 
 #
