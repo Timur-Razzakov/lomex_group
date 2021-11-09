@@ -9,10 +9,8 @@ def movies_data(apps, schema_editor):
         data = json.loads(read)
         art = apps.get_model('mainapp', 'Movie')
         writer_2 = apps.get_model('mainapp', 'Writer')
-        actor = apps.get_model('mainapp', 'Actor')
 
         for item in data:
-            ac = []
             wr = []
             # убираем лишние пробелы
             if item['writers'].strip():
@@ -24,6 +22,7 @@ def movies_data(apps, schema_editor):
                 wr.append(item['writer'])
             # берёт объекты писателей из бд
             writers_objects = [writer_2.objects.get(id=x) for x in wr]
+            # Прописываем каждый fields в для заполнения класса Movie
             movies = art(
                 id=item['id'],
                 title=item["title"],
@@ -33,8 +32,8 @@ def movies_data(apps, schema_editor):
                 description=item["plot"],
                 imdb_rating=item["imdb_rating"],
             )
-            # берём каждое значение и проверяем его на None
             for writer in writers_objects:
+                # берём каждое значение и проверяем его на None
                 if writer.name == 'N/A':
                     movies.writers_names = None
                 else:
@@ -75,6 +74,27 @@ def writers_data(apps, schema_editor):
             ).save()
 
 
+def movies_actors(apps, schema_editor):
+    with open('mainapp/fixtures/movie_actors.json', 'r', encoding='UTF-8') as f:
+        read = f.read()
+        data = json.loads(read)
+        movies = apps.get_model('mainapp', 'Movie')
+        actors = apps.get_model('mainapp', 'Actor')
+
+        for item in data:
+            movie = movies.objects.get(id=item["movie_id"])
+            actor = actors.objects.get(id=item["actor_id"])
+            if actor.name == "N/A":
+                movie.actor_names = None
+            elif movie.actor_names is not None and movie.actor_names.strip():
+                names = movie.actor_names + ", " + actor.name
+                movie.actor_names = names
+            else:
+                movie.actor_names = actor.name
+            movie.save()
+            movie.actors.add(actor)
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('mainapp', '0001_initial'),
@@ -83,4 +103,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(actor_data),
         migrations.RunPython(writers_data),
         migrations.RunPython(movies_data),
+        migrations.RunPython(movies_actors)
     ]

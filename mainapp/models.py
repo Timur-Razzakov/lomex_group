@@ -32,7 +32,7 @@ class Movie(models.Model):
     writers_names = models.CharField(verbose_name='Список имён писателей', max_length=255, null=True)
     director = models.CharField(max_length=255, verbose_name='Режисёр')
     actors = models.ManyToManyField(Actor, blank=True, verbose_name='Актёр', related_name='Movie')
-    actor_names = models.CharField(verbose_name='Список имён актёров', max_length=255)
+    actor_names = models.CharField(verbose_name='Список имён актёров', max_length=255,null=True)
 
     def __str__(self):
         return self.title
