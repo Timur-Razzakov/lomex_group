@@ -19,5 +19,3 @@ class MovieAdmin(admin.ModelAdmin):
 admin.site.register(Actor)
 admin.site.register(Writer)
 admin.site.register(Movie)
-
-prepopulated_fields = {"Actor ": ("actors",)}

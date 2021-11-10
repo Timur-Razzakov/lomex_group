@@ -6,7 +6,7 @@ from django.db import models
 class Actor(models.Model):
     id = models.CharField(max_length=255,primary_key=True, editable=False, default='')
     # id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
-    name = models.CharField(max_length=255, verbose_name='Имя актёра')
+    name = models.CharField(max_length=255, verbose_name='Имя актёра',null =True)
 
     def __str__(self):
         return self.name
