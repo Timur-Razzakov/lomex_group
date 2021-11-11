@@ -6,9 +6,10 @@
 </head>
 <body>
 <div class="d-grid gap-2">
-    <button class="btn btn-primary" type="button">Get/api/genre</button>
-    <button class="btn btn-primary" type="button">Get/api/actor</button>
-    <button class="btn btn-primary" type="button">Get/api/director</button>
+    <a href="{% url 'genres' %}">Get/api/genre</a>
+    <a href="{% url 'actors' %}">Get/api/actor</a>
+    <a href="{% url 'directors' %}">Get/api/director</a>
+
 </div>
 </body>
 </html>

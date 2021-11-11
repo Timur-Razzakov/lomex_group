@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'art.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'dbb.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     },
     #     'NAME': 'db.sqlite',
     #     'ENGINE': 'django.db.backends.sqlite3',

@@ -5,6 +5,8 @@ from django.core import serializers
 from django.db.models import Max
 from django.http import HttpResponse
 from django.shortcuts import render
+from icecream import ic
+
 from .models import Actor, Writer, Movie
 
 from .data_unique import unique_genres, unique_actors, unique_directors
@@ -17,6 +19,8 @@ from .data_unique import unique_genres, unique_actors, unique_directors
 genres = unique_genres('genre', Movie)
 actors = unique_actors('name', Actor)
 directors = unique_directors('director', Movie)
+print(len(directors))
+print(len(actors))
 
 
 def index(request):
@@ -24,6 +28,7 @@ def index(request):
 
 
 def get_api_genres(request):
+    results = []
     for genre in genres:
         # берём с бд поля которые нам нужны
         movie = Movie.objects.filter(genre__contains=genre).values('title', 'imdb_rating')
@@ -35,8 +40,14 @@ def get_api_genres(request):
             imdb_rating += float(item["imdb_rating"])
         avg_rating = round(imdb_rating / movie_count, 1)
 
-        print(genre, movie_count, avg_rating, '\n--------------------')
-    return render(request, 'mainapp/genres.html', )
+        data = {
+            "genre": genre,
+            "movies_count": len(movie),
+            "avg_rating": avg_rating
+        }
+        results.append(data)
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def get_api_actors(request):
@@ -51,12 +62,8 @@ def get_api_actors(request):
 
         if movie is None:
             continue
-        print(movie, actor)
+
         movie_list = list(movie)
-        try:
-             m = movie_list[0]['genre']
-        except Exception:
-            print(movie_list)
         data = {
             "actor_name": actor,
             "movies_count": len(movie),
@@ -64,56 +71,49 @@ def get_api_actors(request):
         }
         results.append(data)
 
-    # return json.dumps(results)
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def get_api_directors(request):
-    ratings = Movie.objects.all().values('director', 'actor_names', 'imdb_rating', 'title')
-    # исп для подсчёта рейтинга
-    all_ratings = 0
-    # исп для показа количества фильмов каждого актёра
-    movies_count = 0
-    # исп для показа количества одного жанра
-    genre_count = 0
-    # перебираем каждого актёра из нашего списка
-    for director in directors:  # 1
-        # for genre in genres: and genre in item["genre"]
-        for item in ratings:
-            if item["director"] in 'N/A':
+    results = []
+    for director in directors:
+        if director in "N/A" or director is None:
+            continue
+
+        movies = Movie.objects.filter(director__contains=director) \
+            .order_by('-imdb_rating') \
+            .values('actor_names', 'title')
+
+        movies = list(movies)
+        actors_set = set(item['actor_names'] for item in movies)
+        actors_list = set()
+
+        for item in actors_set:
+            if item is None:
                 continue
-            if director in item["director"]:
-                movies_count += 1
+            for it in item.split(','):
+                actors_list.add(it.strip())
+        # из списка создаём словарь, для подсчёта количества фильмов у актёра
+        actors_count = dict.fromkeys(actors_list, 0)
 
-                genre_count = 0
-        count_film = movies_count
-        movies_count = 0
+        for movie in movies:
+            if movie['actor_names'] is None:
+                movies.remove(movie)
+                continue
+            for act_name, _ in actors_count.items():
+                if act_name in movie['actor_names']:
+                    actors_count[act_name] += 1
 
-    # if item["imdb_rating"] in 'N/A':
-    #     continue
-    # all_ratings += float(item["imdb_rating"])
-    #
-    # print(actor, movies_count, all_ratings, )
+        sorted_list = [{"name": k, "movie_count": v}
+                       for k, v in sorted(actors_count.items(), key=lambda item: item[1], reverse=True)]
 
-    return render(request, 'mainapp/directors.html')
+        data = {
+            "director_name": director,
+            "favorite_actors": sorted_list[:3],
+            "best_movies": movies[:3]
+        }
 
-# def index(request):
-#     #  превращаем QueryString в json format
-#     all_movie = serializers.serialize("json", Movie.objects.all(), fields=('genre', 'imdb_rating'))
-#     # преобразовывем  в лист
-#     first_batch = json.loads(all_movie)
-#     # s =set(var for dic in first_batch for var in dic.values())
-#     # print(s)
-#     # перебирем каждую таблицу
-#     # for items in first_batch:
-#     #     if items is 'genre':
-#     #         print(items['genre'])
-#     # genre_1 = [item['genre'] for item in all_movie]
-#     print((all_movie))
-#     print(type(first_batch))
-#
-#     # print(type(first_batch))
-#     # for item in all_movie:
-#     #     m = item.objects.get(genre=item['genre'])
-#     #     print(m)
-#     return render(request, 'mainapp/index.html', {'all_movie': all_movie})
+        ic(data)
+        results.append(data)
+
+    return HttpResponse(json.dumps(results), content_type='application/json')

@@ -34,7 +34,8 @@ def unique_directors(field_from_table, model):
     all_movie = model.objects.all().values(field_from_table)
     all_movie_list = list(all_movie)
     # Получаем уникальные имена
-    set_directors = set(val for dic in all_movie_list for val in dic.values())
-    for name in set_directors:
-        directors.add(name)
+    set_directors = set(dic['director'] for dic in all_movie_list)
+    for item in set_directors:
+        for name in item.split(','):
+            directors.add(name)
     return directors
