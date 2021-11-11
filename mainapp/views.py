@@ -1,26 +1,17 @@
 import json
-import re
-
-from django.core import serializers
-from django.db.models import Max
 from django.http import HttpResponse
 from django.shortcuts import render
 from icecream import ic
 
-from .models import Actor, Writer, Movie
+from .models import Actor, Movie
 
 from .data_unique import unique_genres, unique_actors, unique_directors
 
-# TODO: преобразовать каждую функцию в Json
-# TODO: вывести на фронт
-# TODO: Дописать функцию Director
-# получаем уникальные жанры
+# TODO: получаем уникальные жанры
 
 genres = unique_genres('genre', Movie)
 actors = unique_actors('name', Actor)
 directors = unique_directors('director', Movie)
-print(len(directors))
-print(len(actors))
 
 
 def index(request):
@@ -113,7 +104,5 @@ def get_api_directors(request):
             "best_movies": movies[:3]
         }
 
-        ic(data)
         results.append(data)
-
     return HttpResponse(json.dumps(results), content_type='application/json')

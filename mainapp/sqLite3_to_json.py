@@ -19,7 +19,6 @@ def export_data(place_and_final_name, pale_database_name, table_name):
         json.dump(json_string, f, ensure_ascii=False, indent=4)
 
 
-#
 # # yaml_string = cursor.fetchall()
 # # with open('fixtures/art_writers.yaml', 'w', encoding='utf-8') as f:
 # #     yaml.dump(yaml_string, f, default_flow_style=False, )

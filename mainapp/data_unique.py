@@ -2,10 +2,6 @@ genres = set()
 actors = set()
 directors = set()
 
-#     #  превращаем QueryString в json format
-#     all_movie = serializers.serialize("json", Movie.objects.all(), fields=('genre', 'imdb_rating'))
-#     # преобразовывем  в лист
-#     first_batch = json.loads(all_movie)
 
 # Указываем модель, откуда будем брать поле
 def unique_genres(field_from_table, model):  # передаём модель и поле из этой модели
