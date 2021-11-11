@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>actors</title>
 </head>
 <body>
-{{results}}
+{% for item in actors %}
+    {{actors|truncatewords:40}}
+{% endfor %}
 </body>
 </html>
